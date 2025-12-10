@@ -39,11 +39,11 @@ No frameworks --- fully static and lightweight.
     /
     ├── index.html
     ├── styles.css
-    ├── favicon.png / favicon.ico
     ├── assets/
-    │   ├── images
-    │   ├── icons
-    │   └── documents
+    │   ├── images/
+    │   ├── icons/
+    │   │   └── favicon.png
+    │   └── documents/
     └── README.md
 
 ------------------------------------------------------------------------
