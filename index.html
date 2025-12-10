@@ -1,29 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Osano Cookie Consent -->
-  <link rel="stylesheet" type="text/css" href="https://cookieconsent.popupsmart.com/src/modal.min.css" />
-  <script src="https://cookieconsent.popupsmart.com/src/modal.min.js"></script>
-  <script>
-    window.start.init({
-      Palette: "palette6",
-      Mode: "banner bottom",
-      Message: "This website uses cookies to ensure you get the best experience. Analytics cookies require your consent.",
-      ButtonText: "I understand",
-      LinkText: "Learn more",
-      LinkHref: "#",
-      Law: { Type: "GDPR" }
-    });
-  </script>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-4GR6F3D8H0"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-4GR6F3D8H0');
-</script>
+    <script>
+    // Initialize CookieConsent banner
+    window.addEventListener("load", function () {
+      window.cookieconsent.initialise({
+        palette: {
+          popup: { background: "#000000" },
+          button: { background: "#f1d600", text: "#000000" }
+        },
+        theme: "classic",
+        type: "opt-in", // IMPORTANT: analytics only after consent
+        content: {
+          message: "This website uses cookies for analytics to help me understand traffic. You can choose whether to allow analytics cookies.",
+          dismiss: "Decline",
+          allow: "Allow analytics",
+          link: "Learn more",
+          href: "#" // later you can add a privacy policy page here
+        },
+
+        // Runs when the banner first loads
+        onInitialise: function (status) {
+          var didConsent = this.hasConsented();
+          if (didConsent) {
+            enableAnalytics();
+          }
+        },
+
+        // Runs when user clicks Allow or Decline
+        onStatusChange: function (status, chosenBefore) {
+          var didConsent = this.hasConsented();
+          if (didConsent) {
+            enableAnalytics();
+          } else {
+            if (window.gtag) {
+              gtag('consent', 'update', {
+                'analytics_storage': 'denied'
+              });
+            }
+          }
+        }
+      });
+    });
+
+    // ---- Google Analytics + Consent Mode ----
+
+    // Load GA4 script
+    (function () {
+      var gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-4GR6F3D8H0";
+      document.head.appendChild(gaScript);
+    })();
+
+    // Setup dataLayer + default consent (DENIED)
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+
+    // Default: analytics OFF until user accepts
+    gtag('consent', 'default', {
+      'analytics_storage': 'denied'
+    });
+
+    // Called when user accepts cookies
+    function enableAnalytics() {
+      gtag('consent', 'update', {
+        'analytics_storage': 'granted'
+      });
+
+      gtag('js', new Date());
+      gtag('config', 'G-4GR6F3D8H0');
+    }
+  </script>
+
+
+  
+  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Markos Ioannou · Developer</title>
