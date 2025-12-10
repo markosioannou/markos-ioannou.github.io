@@ -73,7 +73,7 @@ GitHub Pages automatically deploys from the `main` branch.
 
 **Markos Ioannou**\
 📧 Email: **markos@markos-ioannou.com**\
-🌐 Website: **https://markos-ioannou.com**\
+🌐 Website: **https://www.markos-ioannou.com**\
 🔗 LinkedIn: **https://www.linkedin.com/in/markos-ioannou**
 
 ------------------------------------------------------------------------
