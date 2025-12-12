@@ -108,6 +108,10 @@ body {
   color: var(--text);
 }
 
+.mobile-nav[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 767px) {
   .nav-cta {
     display: none !important;
