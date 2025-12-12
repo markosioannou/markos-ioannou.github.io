@@ -7,6 +7,7 @@
 
   <!-- Uses your existing site stylesheet -->
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 
 <body>
@@ -59,6 +60,14 @@
             <textarea id="message" name="message" rows="6" required></textarea>
           </div>
 
+          <!-- Turnstile (anti-bot) -->
+          <div class="cf-turnstile"
+               data-sitekey="0x4AAAAAACGPrYNWH3UJ-UKd"
+               data-theme="dark"
+               data-callback="onTurnstileOk"
+               data-expired-callback="onTurnstileExpired">
+          </div>
+          
           <div class="form-actions">
             <button class="btn-main" id="submit-btn" type="submit">✉️ Send message</button>
             <span id="form-status" class="form-status" aria-live="polite"></span>
@@ -104,142 +113,114 @@
     </footer>
   </div>
 
-  <script>
-    // Footer year
-    document.getElementById("year").textContent = new Date().getFullYear();
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
 
-    // Cloudflare Worker endpoint (Worker -> Overview -> workers.dev URL)
-    const WORKER_ENDPOINT = "https://contact-form.markosioannou.workers.dev";
+  const WORKER_ENDPOINT = "https://contact-form.markosioannou.workers.dev";
 
-    const form = document.getElementById("contact-form");
-    const statusEl = document.getElementById("form-status");
-    const submitBtn = document.getElementById("submit-btn");
+  const form = document.getElementById("contact-form");
+  const statusEl = document.getElementById("form-status");
+  const submitBtn = document.getElementById("submit-btn");
 
-    // Disposable email blocking (client-side; later we can also enforce on the Worker)
-    const DISPOSABLE = new Set([
-      "mailinator.com",
-      "yopmail.com",
-      "tempmail.com",
-      "10minutemail.com",
-      "guerrillamail.com",
-      "guerrillamail.net",
-      "trashmail.com",
-      "getnada.com",
-      "maildrop.cc",
-      "sharklasers.com"
-    ]);
+  // Turnstile token gets stored here
+  let turnstileToken = "";
 
-    function okEmailFormat(email) {
-      // Human-friendly checks: not perfect "verification", but blocks obvious garbage
-      const e = (email || "").trim().toLowerCase();
-      if (e.length > 254) return false;
-      if (e.includes("..")) return false;
+  // Turnstile callbacks (called by the widget)
+  window.onTurnstileOk = (token) => {
+    turnstileToken = token;
+    statusEl.textContent = "";
+    submitBtn.disabled = false;
+  };
 
-      const at = e.indexOf("@");
-      if (at <= 0 || at !== e.lastIndexOf("@")) return false;
+  window.onTurnstileExpired = () => {
+    turnstileToken = "";
+    submitBtn.disabled = true;
+    statusEl.textContent = "Please complete the anti-spam check again.";
+  };
 
-      const domain = e.slice(at + 1);
-      if (!domain.includes(".")) return false;
+  // Optional: disable submit until Turnstile completes
+  submitBtn.disabled = true;
 
-      const tld = domain.split(".").pop();
-      if (!tld || tld.length < 2) return false;
+  // Disposable email blocking (client-side UX)
+  const DISPOSABLE = new Set([
+    "mailinator.com","yopmail.com","tempmail.com","10minutemail.com",
+    "guerrillamail.com","guerrillamail.net","trashmail.com","getnada.com",
+    "maildrop.cc","sharklasers.com"
+  ]);
 
-      return true;
+  function okEmailFormat(email) {
+    const e = (email || "").trim().toLowerCase();
+    if (e.length > 254) return false;
+    if (e.includes("..")) return false;
+    const at = e.indexOf("@");
+    if (at <= 0 || at !== e.lastIndexOf("@")) return false;
+    const domain = e.slice(at + 1);
+    if (!domain.includes(".")) return false;
+    const tld = domain.split(".").pop();
+    if (!tld || tld.length < 2) return false;
+    return true;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    statusEl.textContent = "";
+
+    const payload = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim().toLowerCase(),
+      subject: form.subject.value.trim(),
+      message: form.message.value.trim(),
+      turnstileToken
+    };
+
+    if (!payload.name || !payload.email || !payload.subject || !payload.message) {
+      statusEl.textContent = "Please fill in all fields.";
+      return;
     }
 
-    // Simple client-side rate limit:
-    // max 3 successful submit attempts per 10 minutes on this device/browser.
-    // (We intentionally apply this AFTER validation so typos don’t “consume” attempts.)
-    const RL_KEY = "contact_rl";
-    function gateRateLimit() {
-      const now = Date.now();
-      const windowMs = 10 * 60 * 1000;
-      const max = 3;
-
-      let arr = [];
-      try {
-        arr = JSON.parse(localStorage.getItem(RL_KEY) || "[]");
-        if (!Array.isArray(arr)) arr = [];
-      } catch {
-        arr = [];
-      }
-
-      const fresh = arr.filter(ts => now - ts < windowMs);
-
-      if (fresh.length >= max) {
-        const minutes = Math.ceil((windowMs - (now - fresh[0])) / 60000);
-        return { ok: false, minutes };
-      }
-
-      fresh.push(now);
-      localStorage.setItem(RL_KEY, JSON.stringify(fresh));
-      return { ok: true };
+    if (!okEmailFormat(payload.email)) {
+      statusEl.textContent = "Please enter a valid email address.";
+      return;
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      statusEl.textContent = "";
+    const domain = payload.email.split("@")[1] || "";
+    if (DISPOSABLE.has(domain)) {
+      statusEl.textContent = "Disposable email addresses are not allowed.";
+      return;
+    }
 
-      const payload = {
-        name: form.name.value.trim(),
-        email: form.email.value.trim().toLowerCase(),
-        subject: form.subject.value.trim(),
-        message: form.message.value.trim()
-      };
+    if (!turnstileToken) {
+      statusEl.textContent = "Please complete the anti-spam check.";
+      return;
+    }
 
-      // 1) Basic required-field validation (fast feedback)
-      if (!payload.name || !payload.email || !payload.subject || !payload.message) {
-        statusEl.textContent = "Please fill in all fields.";
+    submitBtn.disabled = true;
+    statusEl.textContent = "Sending…";
+
+    try {
+      const res = await fetch(WORKER_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        statusEl.textContent = t || "Could not send. Please try again.";
+        submitBtn.disabled = false;
         return;
       }
 
-      // 2) Email format checks (blocks obvious invalid emails)
-      if (!okEmailFormat(payload.email)) {
-        statusEl.textContent = "Please enter a valid email address.";
-        return;
-      }
-
-      // 3) Disposable blocklist (client-side)
-      const domain = payload.email.split("@")[1] || "";
-      if (DISPOSABLE.has(domain)) {
-        statusEl.textContent = "Disposable email addresses are not allowed.";
-        return;
-      }
-
-      // 4) Rate limit (applies only once validation passes)
-      const gate = gateRateLimit();
-      if (!gate.ok) {
-        statusEl.textContent = `Please wait ~${gate.minutes} min before trying again.`;
-        return;
-      }
-
-      // Send
+      form.reset();
+      turnstileToken = "";
+      statusEl.textContent = "Sent ✔ Thanks!";
+      // Turnstile will re-enable the button when user completes it again
       submitBtn.disabled = true;
-      statusEl.textContent = "Sending…";
-
-      try {
-        const res = await fetch(WORKER_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          // Note: if you see "Forbidden", your Worker ALLOWED_ORIGIN is mismatched.
-          const t = await res.text().catch(() => "");
-          statusEl.textContent = t || "Could not send. Please try again.";
-          submitBtn.disabled = false;
-          return;
-        }
-
-        form.reset();
-        statusEl.textContent = "Sent ✔ Thanks!";
-        submitBtn.disabled = false;
-      } catch {
-        statusEl.textContent = "Network error. Please try again.";
-        submitBtn.disabled = false;
-      }
-    });
-  </script>
+    } catch {
+      statusEl.textContent = "Network error. Please try again.";
+      submitBtn.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
