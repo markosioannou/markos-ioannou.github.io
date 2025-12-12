@@ -317,6 +317,29 @@
     });
   });
 </script>
-  
+
+<!-- Hamburger Menu Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.querySelector(".nav-toggle");
+    const menu = document.getElementById("mobile-nav");
+    if (!btn || !menu) return;
+
+    btn.addEventListener("click", () => {
+      const isOpen = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!isOpen));
+      menu.hidden = isOpen;
+    });
+
+    // Close menu after clicking a link
+    menu.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => {
+        btn.setAttribute("aria-expanded", "false");
+        menu.hidden = true;
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
