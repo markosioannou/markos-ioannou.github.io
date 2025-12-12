@@ -99,7 +99,6 @@ open index.html
 ## 📬 Contact
 
 **Markos Ioannou**  
-📧 Email: **markos@markos-ioannou.com**  
 🌐 Website: **https://markos-ioannou.com**  
 🔗 LinkedIn: **https://www.linkedin.com/in/markos-ioannou**
 
