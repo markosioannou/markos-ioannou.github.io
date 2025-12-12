@@ -44,6 +44,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+
+  position: relative; /* needed for overlay mobile menu */
 }
 
 @media (min-width: 900px) {
@@ -54,7 +56,7 @@ body {
 }
 
 /* ---------------------------
-   NAV (mobile-first, fixed)
+   NAV (mobile-first, overlay)
 ---------------------------- */
 
 .nav {
@@ -65,7 +67,7 @@ body {
 
   position: sticky;
   top: 1rem;
-  z-index: 50;
+  z-index: 9999;
 
   padding: 0.7rem 1rem;
   border-radius: 999px;
@@ -74,6 +76,9 @@ body {
   border: 1px solid rgba(148, 163, 184, 0.12);
   backdrop-filter: blur(14px);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+
+  isolation: isolate; /* iOS stacking fix */
+  -webkit-transform: translateZ(0); /* iOS tap fix */
 }
 
 .nav-left {
@@ -112,13 +117,11 @@ body {
   color: var(--muted);
 }
 
-/* Mobile-first defaults */
+/* Mobile-first visibility */
 .nav-links,
 .nav-cta {
   display: none;
 }
-
-/* Desktop only */
 
 .nav-toggle {
   display: inline-flex;
@@ -131,22 +134,49 @@ body {
   padding: 0.45rem 0.75rem;
   cursor: pointer;
   position: relative;
-  z-index: 60; /* keep button clickable */
+  z-index: 10000; /* stays tappable above overlays */
+  pointer-events: auto;
 }
 
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: background var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast);
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  border-color: #111827;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+/* Mobile dropdown (overlay) */
 .mobile-nav {
-  margin-top: 0.6rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  /* dropdown sits under sticky nav */
+  top: calc(1rem + 64px); /* adjust (56–72px) if needed */
+  margin-top: 0;
+
   border-radius: 1.25rem;
   border: 1px solid rgba(148, 163, 184, 0.12);
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(14px);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
   padding: 0.6rem;
+
   display: grid;
   gap: 0.25rem;
+  z-index: 9998;
 }
 
-/* CRITICAL: make hidden actually hide (CSS otherwise overrides it) */
 .mobile-nav[hidden] {
   display: none !important;
 }
@@ -156,6 +186,7 @@ body {
   color: #9ca3af;
   padding: 0.55rem 0.75rem;
   border-radius: 0.9rem;
+  pointer-events: auto;
 }
 
 .mobile-nav a:hover {
@@ -163,7 +194,7 @@ body {
   color: var(--text);
 }
 
-/* Desktop nav at the SAME breakpoint as your layout */
+/* Desktop nav (≥ 900px) */
 @media (min-width: 900px) {
   .nav-toggle {
     display: none;
@@ -184,23 +215,7 @@ body {
   }
 }
 
-.nav-links a {
-  text-decoration: none;
-  color: var(--muted);
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  transition: background var(--transition-fast),
-              color var(--transition-fast),
-              border-color var(--transition-fast);
-}
-
-.nav-links a:hover {
-  color: var(--text);
-  border-color: #111827;
-  background: rgba(15, 23, 42, 0.95);
-}
-
+/* CTA button style (no display here to avoid overriding nav-cta visibility) */
 .pill-btn {
   border-radius: var(--radius-full);
   padding: 0.45rem 0.9rem;
@@ -213,9 +228,10 @@ body {
   );
   color: var(--text);
   text-decoration: none;
-  display: inline-flex;
+
   align-items: center;
   gap: 0.4rem;
+
   cursor: pointer;
   transition: border-color var(--transition-fast),
               background var(--transition-fast),
