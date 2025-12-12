@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact • Markos Ioannou</title>
+
+  <!-- Uses your existing site stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="shell">
+    <header class="nav">
+      <div class="nav-left">
+        <div class="logo-circle">M</div>
+        <div class="brand-text">
+          <div class="brand-name">Markos Ioannou</div>
+          <div class="brand-tag">Contact</div>
+        </div>
+      </div>
+
+      <a class="pill-btn" href="index.html">← Back</a>
+    </header>
+
+    <main>
+      <!-- LEFT: form panel -->
+      <section class="panel">
+        <div class="badge-row">
+          <span class="badge-pill">Contact</span>
+          Send me a message
+        </div>
+
+        <h1>Let’s talk</h1>
+        <p class="subtitle">
+          Fill in the form and I’ll get back to you. (No disposable email addresses.)
+        </p>
+
+        <form id="contact-form" class="contact-form" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required />
+            </div>
+
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="subject">Subject</label>
+            <input id="subject" name="subject" type="text" required />
+          </div>
+
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-main" id="submit-btn" type="submit">✉️ Send message</button>
+            <span id="form-status" class="form-status" aria-live="polite"></span>
+          </div>
+        </form>
+
+        <!-- Note:
+             If you later add Turnstile, we’ll drop the widget right here above the button,
+             and include its token in the payload. -->
+      </section>
+
+      <!-- RIGHT: links panel -->
+      <aside class="panel-right">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Find me</div>
+            <div class="card-kicker">Links</div>
+          </div>
+
+          <div class="card-link-row">
+            <!-- Note: replace these with your real URLs -->
+            <a class="card-link" href="https://www.linkedin.com/in/YOUR-LINKEDIN" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a class="card-link" href="https://github.com/YOUR-GITHUB" target="_blank" rel="noreferrer">GitHub</a>
+            <a class="card-link" href="mailto:markos@markos-ioannou.com">Email</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Email</div>
+            <div class="card-kicker">Direct</div>
+          </div>
+          <div style="color:#9ca3af; line-height:1.6;">
+            markos@markos-ioannou.com
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <div>© <span id="year"></span> Markos Ioannou</div>
+      <div><a href="index.html">Home</a></div>
+    </footer>
+  </div>
+
+  <script>
+    // Footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Cloudflare Worker endpoint (Worker -> Overview -> workers.dev URL)
+    const WORKER_ENDPOINT = "https://contact-form.markosioannou.workers.dev";
+
+    const form = document.getElementById("contact-form");
+    const statusEl = document.getElementById("form-status");
+    const submitBtn = document.getElementById("submit-btn");
+
+    // Disposable email blocking (client-side; later we can also enforce on the Worker)
+    const DISPOSABLE = new Set([
+      "mailinator.com",
+      "yopmail.com",
+      "tempmail.com",
+      "10minutemail.com",
+      "guerrillamail.com",
+      "guerrillamail.net",
+      "trashmail.com",
+      "getnada.com",
+      "maildrop.cc",
+      "sharklasers.com"
+    ]);
+
+    function okEmailFormat(email) {
+      // Human-friendly checks: not perfect "verification", but blocks obvious garbage
+      const e = (email || "").trim().toLowerCase();
+      if (e.length > 254) return false;
+      if (e.includes("..")) return false;
+
+      const at = e.indexOf("@");
+      if (at <= 0 || at !== e.lastIndexOf("@")) return false;
+
+      const domain = e.slice(at + 1);
+      if (!domain.includes(".")) return false;
+
+      const tld = domain.split(".").pop();
+      if (!tld || tld.length < 2) return false;
+
+      return true;
+    }
+
+    // Simple client-side rate limit:
+    // max 3 successful submit attempts per 10 minutes on this device/browser.
+    // (We intentionally apply this AFTER validation so typos don’t “consume” attempts.)
+    const RL_KEY = "contact_rl";
+    function gateRateLimit() {
+      const now = Date.now();
+      const windowMs = 10 * 60 * 1000;
+      const max = 3;
+
+      let arr = [];
+      try {
+        arr = JSON.parse(localStorage.getItem(RL_KEY) || "[]");
+        if (!Array.isArray(arr)) arr = [];
+      } catch {
+        arr = [];
+      }
+
+      const fresh = arr.filter(ts => now - ts < windowMs);
+
+      if (fresh.length >= max) {
+        const minutes = Math.ceil((windowMs - (now - fresh[0])) / 60000);
+        return { ok: false, minutes };
+      }
+
+      fresh.push(now);
+      localStorage.setItem(RL_KEY, JSON.stringify(fresh));
+      return { ok: true };
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusEl.textContent = "";
+
+      const payload = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim().toLowerCase(),
+        subject: form.subject.value.trim(),
+        message: form.message.value.trim()
+      };
+
+      // 1) Basic required-field validation (fast feedback)
+      if (!payload.name || !payload.email || !payload.subject || !payload.message) {
+        statusEl.textContent = "Please fill in all fields.";
+        return;
+      }
+
+      // 2) Email format checks (blocks obvious invalid emails)
+      if (!okEmailFormat(payload.email)) {
+        statusEl.textContent = "Please enter a valid email address.";
+        return;
+      }
+
+      // 3) Disposable blocklist (client-side)
+      const domain = payload.email.split("@")[1] || "";
+      if (DISPOSABLE.has(domain)) {
+        statusEl.textContent = "Disposable email addresses are not allowed.";
+        return;
+      }
+
+      // 4) Rate limit (applies only once validation passes)
+      const gate = gateRateLimit();
+      if (!gate.ok) {
+        statusEl.textContent = `Please wait ~${gate.minutes} min before trying again.`;
+        return;
+      }
+
+      // Send
+      submitBtn.disabled = true;
+      statusEl.textContent = "Sending…";
+
+      try {
+        const res = await fetch(WORKER_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          // Note: if you see "Forbidden", your Worker ALLOWED_ORIGIN is mismatched.
+          const t = await res.text().catch(() => "");
+          statusEl.textContent = t || "Could not send. Please try again.";
+          submitBtn.disabled = false;
+          return;
+        }
+
+        form.reset();
+        statusEl.textContent = "Sent ✔ Thanks!";
+        submitBtn.disabled = false;
+      } catch {
+        statusEl.textContent = "Network error. Please try again.";
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
