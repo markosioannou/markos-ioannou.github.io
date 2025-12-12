@@ -112,18 +112,9 @@ body {
   display: none !important;
 }
 
-@media (max-width: 767px) {
-  .nav-cta {
-    display: none !important;
-  }
-}
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .nav-toggle { display: none; }
   .mobile-nav { display: none; }
-}
-@media (max-width: 767px) {
-  .nav-links { display: none; }  /* keep desktop links hidden on mobile */
-  .nav-cta { display: none; }    /* optional: hide CTA to reduce clutter */
 }
 
 .nav-left {
