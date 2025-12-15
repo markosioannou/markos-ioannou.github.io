@@ -1,5 +1,6 @@
 ---
 permalink: /404.html
+layout: null
 ---
 
 <!DOCTYPE html>
@@ -12,15 +13,31 @@ permalink: /404.html
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
+    html, body {
+      height: 100%;
+    }
+
     body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+
       text-align: center;
       padding: 4rem 1.5rem;
       color: #e5e7eb;
     }
 
-    .container {
+    .page-404 {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-404 .container {
       max-width: 640px;
-      margin: 0 auto;
+      width: 100%;
       padding: 2rem;
       background: rgba(15, 23, 42, 0.8);
       border-radius: 1.5rem;
@@ -29,45 +46,54 @@ permalink: /404.html
       backdrop-filter: blur(18px);
     }
 
-    h1 {
+    .page-404 h1 {
       margin-bottom: 0.5rem;
       font-size: 2.8rem;
       letter-spacing: -0.03em;
     }
 
-    p {
+    .page-404 p {
       margin: 0.75rem 0 1.5rem;
       color: #9ca3af;
       font-size: 1rem;
     }
 
-    a.btn {
-      padding: 0.6rem 1rem;
+    .page-404 a.btn {
+      padding: 0a6rem 1rem;
       font-size: 0.9rem;
       border-radius: 999px;
       background: radial-gradient(circle at top left, #0ea5e9, #0369a1);
       color: #f9fafb;
       text-decoration: none;
       display: inline-block;
-      box-shadow: 0 10px 30px rgba(8,47,73,0.8);
+      box-shadow: 0 10px 30px rgba(8, 47, 73, 0.8);
       transition: 0.15s ease-out;
     }
 
-    a.btn:hover {
+    .page-404 a.btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 18px 40px rgba(8,47,73,1);
+      box-shadow: 0 18px 40px rgba(8, 47, 73, 1);
+    }
+
+    .footer-wrap {
+      margin-top: auto;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>404</h1>
-    <p>Oops! The page you're looking for doesn’t exist (yet).</p>
-    <a href="/" class="btn">← Back to home</a>
-  </div>
 
-  {% include footer.html %}
+  <main class="page-404">
+    <div class="container">
+      <h1>404</h1>
+      <p>Oops! The page you're looking for doesn’t exist (yet).</p>
+      <a href="/" class="btn">← Back to home</a>
+    </div>
+  </main>
+
+  <div class="footer-wrap">
+    {% include footer.html %}
+  </div>
 
 </body>
 </html>
