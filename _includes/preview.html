@@ -54,16 +54,36 @@
      Structured Data (JSON-LD)
      Google / SEO
 ===================== -->
+
+<!-- =====================
+     Structured Data (JSON-LD)
+     Person
+===================== -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "{{ site.title }}",
+  "@id": "{{ site.url }}#person",
+  "name": "Markos Ioannou",
   "url": "{{ site.url }}",
+  "image": "{{ site.url }}/assets/images/profile.jpg",
+  "jobTitle": "Data Analytics & Machine Learning",
+  "description": "Data analytics and machine learning professional with a focus on applied data science, insights, and real-world problem solving.",
   "sameAs": [
-    "https://www.linkedin.com/in/markos-ioannou"
+    "https://www.linkedin.com/in/markos-ioannou",
+    "https://github.com/markosioannou"
   ],
-  "jobTitle": "Data Analytics & Machine Learning & Bioinformatics",
-  "email": "mailto:markos@markos-ioannou.com"
+  "knowsAbout": [
+    "Data Analytics",
+    "Machine Learning",
+    "Data Science",
+    "Python",
+    "SQL",
+    "Statistics",
+    "Data Visualization",
+    "Bioinformatics",
+    "Healthcare Data Science",
+    "Artificial Intelligence"
+  ]
 }
 </script>
