@@ -87,3 +87,60 @@
   ]
 }
 </script>
+
+<!-- Person -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "{{ site.url }}/#person",
+  "name": "Markos Ioannou",
+  "url": "{{ site.url }}/",
+  "image": "{{ site.url }}/assets/images/profile.jpeg",
+  "jobTitle": "Data Analytics & Machine Learning",
+  "description": "Data analytics and machine learning professional with a focus on applied data science, insights, and real-world problem solving.",
+  "sameAs": [
+    "https://www.linkedin.com/in/markosioannou",
+    "https://github.com/markosioannou"
+  ],
+  "mainEntityOfPage": {
+    "@id": "{{ site.url }}/#website"
+  },
+  "worksFor": {
+    "@id": "{{ site.url }}/#organization"
+  }
+}
+</script>
+
+<!-- Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "{{ site.url }}/#organization",
+  "name": "Markos Ioannou",
+  "url": "{{ site.url }}/",
+  "logo": "{{ site.url }}/assets/images/logo.png",
+  "sameAs": [
+    "https://www.linkedin.com/in/markosioannou",
+    "https://github.com/markosioannou"
+  ],
+  "founder": {
+    "@id": "{{ site.url }}/#person"
+  }
+}
+</script>
+
+<!-- WebSite -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "{{ site.url }}/#website",
+  "url": "{{ site.url }}/",
+  "name": "Markos Ioannou",
+  "publisher": {
+    "@id": "{{ site.url }}/#organization"
+  }
+}
+</script>
