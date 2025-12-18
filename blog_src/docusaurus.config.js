@@ -23,7 +23,7 @@ const config = {
   url: 'https://markos-ioannou.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/blog/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -53,6 +53,7 @@ const config = {
             //'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         blog: {
+          routeBasePath: '/',
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -95,7 +96,7 @@ const config = {
             position: 'left',
             label: 'Tutorial',
           },
-          {to: '/blog/', label: 'Blog', position: 'left'},
+          {to: '/', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/facebook/docusaurus',
             label: 'GitHub',
