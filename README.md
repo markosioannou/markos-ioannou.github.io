@@ -1,4 +1,4 @@
-# 🌐 Markos Ioannou — Personal Website & Portfolio
+# 🌐 Markos Ioannou — Personal Web site & Portfolio
 
 ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Deployed-brightgreen)
 ![Website](https://img.shields.io/website?url=https://markos-ioannou.com)
