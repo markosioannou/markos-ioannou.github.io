@@ -87,18 +87,25 @@ body {
   gap: 0.75rem;
 }
 
+/* OG: make logo behave like docu (no white circle) */
 .logo-circle {
-  width: 32px;
-  height: 32px;
+  background: transparent !important; /* remove the white/grey coin */
+  box-shadow: none !important;        /* optional: if docu has no logo shadow */
+}
+
+/* keep it circular + cropped */
+.logo-circle {
+  overflow: hidden;
   border-radius: 999px;
-  background: radial-gradient(circle at 30% 10%, #e5e7eb, #64748b);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #020617;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+}
+
+/* photo fills it */
+.logo-circle img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 999px;
 }
 
 .logo-circle.logo-photo {
