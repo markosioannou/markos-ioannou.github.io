@@ -1,30 +1,251 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+/* =========================================================
+   Markos theme — Docusaurus skin
+   Drop-in for: blog_src/src/css/custom.css
+   ========================================================= */
 
-/* You can override the default Infima variables here. */
+/* 1) Your design tokens */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --bg: #020617;
+  --bg-elevated: #020617;
+  --bg-card: #020617;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.17);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border-subtle: #1f2937;
+  --shadow-soft: 0 30px 80px rgba(15, 23, 42, 0.85);
+  --radius-xl: 1.5rem;
+  --radius-full: 999px;
+  --transition-fast: 160ms ease-out;
+  --transition-med: 220ms ease;
+
+  /* 2) Map tokens -> Infima / Docusaurus variables */
+  --ifm-color-primary: var(--accent);
+  --ifm-color-primary-dark: #0ea5e9;
+  --ifm-color-primary-darker: #0284c7;
+  --ifm-color-primary-light: #7dd3fc;
+  --ifm-color-primary-lighter: #a5e7ff;
+
+  --ifm-font-family-base: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+
+  --ifm-background-color: var(--bg);
+  --ifm-font-color-base: var(--text);
+  --ifm-color-content: var(--text);
+  --ifm-color-content-secondary: var(--muted);
+
+  --ifm-navbar-height: 64px;
+  --ifm-navbar-background-color: rgba(15, 23, 42, 0.55);
+  --ifm-navbar-shadow: none;
+
+  --ifm-footer-background-color: rgba(15, 23, 42, 0.85);
+
+  --ifm-card-background-color: rgba(15, 23, 42, 0.96);
+  --ifm-global-border-width: 1px;
+  --ifm-global-radius: 18px;
+
+  --ifm-link-color: var(--accent);
+  --ifm-link-hover-color: #a5e7ff;
+
+  --ifm-code-font-size: 92%;
+  --ifm-pre-background: rgba(15, 23, 42, 0.96);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+/* Keep dark mode consistent */
+html[data-theme='dark'] {
+  --ifm-background-color: var(--bg);
+  --ifm-font-color-base: var(--text);
+  --ifm-color-content-secondary: var(--muted);
+}
+
+/* 3) Global page background + typography rhythm */
+html, body {
+  background:
+    radial-gradient(circle at top, #1f2937 0, transparent 55%),
+    radial-gradient(circle at bottom, #0f172a 0, transparent 55%),
+    var(--bg) !important;
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+.markdown {
+  line-height: 1.75;
+}
+
+/* 4) Container width to match your shell vibe */
+.container {
+  max-width: 1120px;
+}
+
+/* 5) Navbar: glass pill style */
+.navbar {
+  position: sticky;
+  top: 1rem;
+  z-index: 9999;
+
+  width: min(1120px, calc(100% - 2.5rem));
+  margin: 0 auto;
+
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+.navbar__inner {
+  padding: 0.35rem 0.75rem;
+}
+
+.navbar__brand {
+  gap: 0.6rem;
+}
+
+.navbar__logo {
+  height: 30px;
+}
+
+.navbar__title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.navbar__item.navbar__link {
+  color: var(--muted);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  transition: background var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast);
+  padding: 0.35rem 0.7rem;
+}
+
+.navbar__item.navbar__link:hover,
+.navbar__item.navbar__link--active {
+  color: var(--text);
+  border-color: #111827;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+/* Navbar icon buttons (mobile menu) */
+.navbar__toggle,
+.navbar__toggle:hover {
+  color: var(--text);
+}
+
+/* 6) Buttons */
+.button {
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background var(--transition-fast),
+              border-color var(--transition-fast);
+}
+
+.button--primary {
+  border: none;
+  background: radial-gradient(circle at top left, #0ea5e9, #0369a1);
+  box-shadow: 0 20px 50px rgba(8, 47, 73, 0.95);
+}
+
+.button--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 25px 60px rgba(8, 47, 73, 1);
+  filter: brightness(1.05);
+}
+
+.button--secondary {
+  border: 1px solid rgba(75, 85, 99, 0.8);
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--muted);
+}
+
+.button--secondary:hover {
+  border-color: rgba(148, 163, 184, 0.9);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+/* 7) Cards / blog list items */
+.card {
+  border-radius: 1.1rem;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.88);
+}
+
+.blog-post-item {
+  border-radius: 1.1rem;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.04), transparent 60%),
+              radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.03), transparent 55%),
+              rgba(15, 23, 42, 0.96);
+  box-shadow: var(--shadow-soft);
+  padding: 1.25rem 1.25rem 1.05rem;
+  overflow: hidden;
+}
+
+.blog-post-item h2 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.blog-post-item h2 a:hover {
+  color: #a5e7ff;
+}
+
+/* 8) Tags / pills */
+.badge,
+a.badge {
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--accent);
+}
+
+/* 9) Code blocks */
+pre {
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  border-radius: 1rem;
+}
+
+code {
+  border-radius: 0.5rem;
+}
+
+/* 10) Footer */
+.footer {
+  border-top: 1px solid rgba(31, 41, 55, 0.8);
+}
+
+.footer__title {
+  color: var(--text);
+}
+
+.footer__link-item {
+  color: #9ca3af;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(75, 85, 99, 0.8);
+  padding-bottom: 1px;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.footer__link-item:hover {
+  color: #e5e7eb;
+  border-bottom-style: solid;
+  border-color: rgba(148, 163, 184, 0.95);
+}
+
+/* 11) Reduce default “boxed” feel for main wrappers */
+.main-wrapper {
+  padding-top: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .main-wrapper {
+    padding-top: 3rem;
+  }
 }
